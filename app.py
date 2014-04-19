@@ -79,7 +79,7 @@ def facebook_authorized(resp):
 		)
 	session['oauth_token'] = (resp['access_token'], '')
 	me = facebook.get('/me')
-	Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email']).save()
+	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email']).save()
 	return redirect(url_for('home'))
 	
 @app.route('/generate')
