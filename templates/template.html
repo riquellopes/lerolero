@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Gerador de LeroLero</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="author" content="Juan Pujol" />
+		<meta name="author" content="Felippe Nardi" />
+		<meta name="author" content="Henrique Lopes" />
+		<meta name="language" content="pt-BR" />
+		<link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css">
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	</head>
+
+<style type="text/css">
+	.hero-unit{background:none;}
+</style>
+
+<script>
+	$(function(){
+		$('#new-lero-lero').click(function(){
+			$('button').attr('disabled', true);
+			$.get('/generate', function(rs){
+				$('textarea').val( rs );
+				$('#p-lero-lero').html( rs ); 
+				$('button').attr('disabled', false);
+			});
+		});
+		
+		$("#post-on-my-timeline").click(function(){
+			$('button').attr('disabled', true);
+			var lero = $('#lero-lero').val();
+			
+			$.post('/timeline-post', {lero:lero}).done(function(rs){
+				console.log(rs);
+			});
+		});
+	});
+</script>
+<body>
+	<div class='hero-unit'>
+		<p id='p-lero-lero'>{{lerolero|safe}}</p>	
+		<form method='post' onsubmit='return false;'>
+			<textarea name='lero-lero' style='display:none;' id='lero-lero'>{{lerolero|safe}}</textarea>
+			<button type='submit' name='post-on-my-timeline' id='post-on-my-timeline' class='btn btn-link'>Post On My timeline</button>
+			<button type='button' name='new-lero-lero' id='new-lero-lero' class='btn btn-link'>New LeroLero</button>
+		</form>
+
+		<footer>
+			Esse app para o facebook, é uma versão dos famosos geradores de <a href='{{url_lerolero}}'>lerolero</a> e <a href='{{url_original}}'>suicidiovirtual.</a><br />Autor: <a href='{{url_git}}'>@riquellopes</a>
+		</footer>
+	</div>
+</body>
+</html>
