@@ -1,7 +1,7 @@
 # coding: utf-8
 import urllib2
 import re
-from flask import Flask, render_template, request, session, url_for
+from flask import Flask, render_template, request, session, url_for, redirect
 from flask.ext.oauth import OAuth
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine
 
@@ -79,7 +79,7 @@ def facebook_authorized(resp):
 		)
 	session['oauth_token'] = (resp['access_token'], '')
 	me = facebook.get('/me')
-	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email']).save()
+	Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email']).save()
 	return redirect(url_for('home'))
 	
 @app.route('/generate')
