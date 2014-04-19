@@ -44,7 +44,7 @@ facebook = oauth.remote_app('facebook',
 
 @app.route('/')
 def home():
-	if app.config['TEST']:
+	if app.config['TEST'] == True:
 		lerolero = "Evidentemente, a execucao dos pontos do programa agrega valor ao estabelecimento dos modos de operacao convencionais.";
 	else:
 		lerolero=LeroLero.get()
