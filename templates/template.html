@@ -7,17 +7,17 @@
 		<meta name="author" content="Felippe Nardi" />
 		<meta name="author" content="Henrique Lopes" />
 		<meta name="language" content="pt-BR" />
+		<meta property="og:type" content="website">
+		<meta property="og:title" content="LeroLero on Facebook">
+		<meta property="og:description" content="Aplicativo tem como objetivo ajudar as pessoas que ficam o dia todo no facebook e em alguns momentos não tem o que escrever. Ele vai te dar ótimas ideias do que pode escrito.">
+		<meta property="og:url" content="http://geradordelerolero.herokuapp.com">
+		<meta property="og:image" content="static/img/platao.jpg">
+		<meta property='og:site_name' content='LeroLero on Facebook' />
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" type="text/css">
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="static/js/bootstrap-timepicker.min.js"></script>
-		<script type="text/javascript" src="//connect.facebook.net/en_UK/all.js"></script>
 	</head>
-
-<style type="text/css">
-	.hero-unit{background:none;}
-</style>
-
 <script>
 	$(function(){
 		$('#new-lero-lero').click(function(){
@@ -37,10 +37,10 @@
 				   attachment: {       
 						name: 'Pensamento do dia', 
 						description: $('#p-lero-lero').text(),
-						/*media: [{ 'type': 'image',
-								  'src': '',
+						media: [{ 'type': 'image',
+								  'src': window.location.href.concat("static/img/platao.jpg"),
 								  'href': window.location.href
-						}],*/
+						}],
 			       		href: window.location.href     
 					},     
 					action_links: [{
@@ -58,14 +58,19 @@
 		    minuteStep: 5
 	    });
 	});
-	
-	window.fbAsyncInit = function() { 
-	   FB.init({appId: 1406194806321410, status: true, cookie: true, xfbml: true}); 
-    };
 </script>
 <body>
 	<div class='container'>
-		<div id='fb-root'></div>
+		<div id="fb-root"></div>
+		<script>
+		(function(d, s, id) {
+		  	var js, fjs = d.getElementsByTagName(s)[0];
+		  	if (d.getElementById(id)) return;
+		  		js = d.createElement(s); js.id = id;
+		  		js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=".concat({{config['FACEBOOK_CONSUMER_KEY']}});
+		  		fjs.parentNode.insertBefore(js, fjs);
+		 }(document, 'script', 'facebook-jssdk'));
+		</script>
 		<div class='header'>
 			<h3 class="text-muted">Lero Lero On Facebook</h3>
 		</div>	
@@ -139,7 +144,10 @@
 		{% endif %}
 		
 		<footer>
+			<div>
 			Esse app para o facebook, é uma versão dos famosos geradores de <a href='{{url_lerolero}}'>lerolero</a> e <a href='{{url_original}}'>suicidiovirtual.</a><br />Autor: <a href='{{url_git}}'>@riquellopes</a>
+			</div>
+			<div class="fb-like" data-href="http://geradordelerolero.herokuapp.com/" data-layout="standard" data-action="recommend" data-show-faces="true" data-share="true"></div>
 		</footer>
 	</div>
 </body>
