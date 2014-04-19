@@ -39,21 +39,24 @@ facebook = oauth.remote_app('facebook',
     authorize_url='https://www.facebook.com/dialog/oauth',
     consumer_key=app.config['FACEBOOK_CONSUMER_KEY'],
     consumer_secret=app.config['FACEBOOK_CONSUMER_SECRET'],
-    request_token_params={'scope': 'email'}
+    request_token_params={'scope': ('email', 'publish_actions', )}
 )
 
 @app.route('/')
 def home():
-	if session.get('oauth_token'):
-		#lerolero = "Evidentemente, a execucao dos pontos do programa agrega valor ao estabelecimento dos modos de operacao convencionais.";
-		lerolero=LeroLero.get()
-		url_lerolero=__URL__
-		url_original=__URL_ORIGINAL__
-		url_git=__URL_GIT__
-		return render_template('template.html', **locals())
+	if app.config['TEST']:
+		lerolero = "Evidentemente, a execucao dos pontos do programa agrega valor ao estabelecimento dos modos de operacao convencionais.";
 	else:
-		return facebook.authorize(callback=url_for('facebook_authorized', next=request.args.get('next') or request.referrer or None, _external=True))
+		lerolero=LeroLero.get()
+	url_lerolero=__URL__
+	url_original=__URL_ORIGINAL__
+	url_git=__URL_GIT__
+	return render_template('template.html', **locals())
 
+@app.route('/login')
+def login():
+	return facebook.authorize(callback=url_for('facebook_authorized', next=request.args.get('next') or request.referrer or None, _external=True))
+	
 @app.route('/login/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
@@ -72,3 +75,11 @@ def generate():
 @app.route('/timeline-post', methods=['POST'])
 def timeline_post():
 	return request.form['lero']
+
+@facebook.tokengetter
+def get_facebook_token():
+	return session.get('facebook_token')
+
+@app.context_processor
+def user_loggend():
+	return dict(user_loggend=session.get('facebook_token'))

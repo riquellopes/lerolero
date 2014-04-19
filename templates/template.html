@@ -7,8 +7,11 @@
 		<meta name="author" content="Felippe Nardi" />
 		<meta name="author" content="Henrique Lopes" />
 		<meta name="language" content="pt-BR" />
-		<link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" type="text/css">
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="static/js/bootstrap-timepicker.min.js"></script>
+		<script type="text/javascript" src="//connect.facebook.net/en_UK/all.js"></script>
 	</head>
 
 <style type="text/css">
@@ -21,30 +24,119 @@
 			$('button').attr('disabled', true);
 			$.get('/generate', function(rs){
 				$('textarea').val( rs );
-				$('#p-lero-lero').html( rs ); 
+				$('#p-lero-lero').html( rs );
 				$('button').attr('disabled', false);
 			});
 		});
 		
-		$("#post-on-my-timeline").click(function(){
-			$('button').attr('disabled', true);
-			var lero = $('#lero-lero').val();
-			
-			$.post('/timeline-post', {lero:lero}).done(function(rs){
-				console.log(rs);
+		$('#pensar-agora').click(function(){
+			FB.ui({method: 'stream.publish',
+				   display:'popup',
+			       message: 'getting educated about Facebook Connect',     
+				   attachment: {       
+						name: 'Connect',       
+						caption: 'The Facebook Connect JavaScript SDK',       
+						description: ('A small JavaScript library that allows you to harness '+'the power of Facebook, bringing the user\'s identity, '+'social graph and distribution power to your site.'),
+						media: [{ 'type': 'image',
+								  'src': 'http://www.yoursite.com/images/facebook_icon.png',
+								  'href': window.location.href
+						}],
+			       		href: 'http://github.com/facebook/connect-js'     
+					},     
+					action_links: [{
+						 text: 'Code', 
+						 href: 'http://github.com/facebook/connect-js'
+					}],
+					user_message_prompt: 'Share your thoughts about Connect'
+
 			});
 		});
+		
+		$('#time').timepicker({
+	        template: false,
+		    showInputs: false,
+		    minuteStep: 5
+	    });
 	});
+	
+	window.fbAsyncInit = function() { 
+	   FB.init({appId: 1406194806321410, status: true, cookie: true, xfbml: true}); 
+    };
 </script>
 <body>
-	<div class='hero-unit'>
-		<p id='p-lero-lero'>{{lerolero|safe}}</p>	
-		<form method='post' onsubmit='return false;'>
-			<textarea name='lero-lero' style='display:none;' id='lero-lero'>{{lerolero|safe}}</textarea>
-			<button type='submit' name='post-on-my-timeline' id='post-on-my-timeline' class='btn btn-link'>Post On My timeline</button>
-			<button type='button' name='new-lero-lero' id='new-lero-lero' class='btn btn-link'>New LeroLero</button>
-		</form>
-
+	<div class='container'>
+		<div id='fb-root'></div>
+		<div class='header'>
+			<h3 class="text-muted">Lero Lero On Facebook</h3>
+		</div>	
+		<div class='jumbotron'>
+			<p id='p-lero-lero'>"{{lerolero|safe}}"</p>	
+			<div>
+				<textarea name='lero-lero' style='display:none;'>{{lerolero|safe}}</textarea>
+				{% if not user_loggend %}
+					<a href="{{url_for('login')}}" id='post-on-my-timeline' class='btn btn-success'>Logar com Facebook</a>
+				{% else %}
+					<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Agendar</button>
+				{% endif %}
+				<button class="btn btn-primary" id='pensar-agora'>Pensar agora</button>
+				<button type='button' name='new-lero-lero' id='new-lero-lero' class='btn btn-primary'>Novo Pensamento</button>
+			</div>
+		</div>
+		<div class='row marketing'>
+			<div class="col-lg-6">
+			    <h4>Sobre:</h4>
+			    <p>	Para facilitar o processo de grandes pensadores do facebook, eu resolvi integrar essa maravilhosa ferramenta com
+					a maior rede social que temos até o momento, e desse modo facilitar o seu dia a dia tão complicado de criar maravilhosos pensamententos diários.</p>
+			 </div>
+			 <div class="col-lg-6">
+			    <h4>Como funciona:</h4>
+			    <p>Basta se conectar ao app com seu Facebook e cadastrar a hora que você deseja que seu pensamento diário seja publicado.</p>
+			 </div>
+		</div>
+		
+		{% if user_loggend %}
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">Agendar horário do pensamento do dia:</h4>
+		      </div>
+		      <div class="modal-body">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label for='days' class='col-sm-2 control-label'>Dias:</label>
+						<div class='col-sm-10'>
+		        			<select name='days' id='days'size="7" multiple="multiple">
+								<option>Domingo</option>
+								<option>Segunda-feira</option>
+								<option>Terça-feira</option>
+								<option>Quarta-feira</option>
+								<option>Quinta-feira</option>
+								<option>Sexta-feira</option>
+								<option>Sábado</option>
+							</select>
+							<span class="help-block">Dias da semana.</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for='time' class="col-sm-2 control-label">Horário:</label>
+						<div class='col-sm-10'>
+							<input type='text' class="input-small" name='time' id='time'/>
+							<span class="help-block">Horário do pensamento.</span>
+						</div>
+					</div>
+				</form>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-primary">Save changes</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		{% endif %}
+		
 		<footer>
 			Esse app para o facebook, é uma versão dos famosos geradores de <a href='{{url_lerolero}}'>lerolero</a> e <a href='{{url_original}}'>suicidiovirtual.</a><br />Autor: <a href='{{url_git}}'>@riquellopes</a>
 		</footer>
