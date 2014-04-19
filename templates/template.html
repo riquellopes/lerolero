@@ -78,12 +78,11 @@
 			<p id='p-lero-lero'>"{{lerolero|safe}}"</p>	
 			<div>
 				<textarea name='lero-lero' style='display:none;'>{{lerolero|safe}}</textarea>
-				{#
 				{% if not user_loggend %}
 					<a href="{{url_for('login')}}" id='post-on-my-timeline' class='btn btn-success'>Logar com Facebook</a>
 				{% else %}
-					<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Agendar</button>
-				{% endif %} #}
+					<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Agendar Pensamento</button>
+				{% endif %}
 				<button class="btn btn-primary" id='pensar-agora'>Pensar agora</button>
 				<button type='button' name='new-lero-lero' id='new-lero-lero' class='btn btn-primary'>Novo Pensamento</button>
 			</div>

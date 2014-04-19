@@ -3,6 +3,7 @@ import urllib2
 import re
 from flask import Flask, render_template, request, session, url_for
 from flask.ext.oauth import OAuth
+from flask_mongoengine import QuerySet, ValidationError, MongoEngine
 
 """
 	Crédito aos autores::
@@ -17,6 +18,7 @@ __URL_GIT__='http://henriquelopes.com.br'
 
 app = Flask(__name__)
 app.config.from_object('settings')
+db=MongoEngine(app)
 
 class LeroLeroException(Exception):
 	pass
@@ -31,6 +33,15 @@ class LeroLero(object):
 			raise LeroLeroException('LeroLero not online.')
 		return (''.join( re.findall('(?s)<blockquote id="frase_aqui">(.*?)</blockquote>', rs) )).decode('utf-8')
 
+# Date current:
+now = datetime.datetime.now
+		
+class Pensador(db.Document):
+	id = db.StringField(primary_key=True)
+	name = db.StringField(required=True)
+	email = db.EmailField(required=True, unique=True)
+	date_created=db.DateTimeField(default=now())
+	
 oauth = OAuth()
 facebook = oauth.remote_app('facebook',
     base_url='https://graph.facebook.com/',
@@ -66,6 +77,9 @@ def facebook_authorized(resp):
 			request.args['error_description']
 		)
 	session['oauth_token'] = (resp['access_token'], '')
+	me = facebook.get('/me')
+	p = Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email'])
+	p.insert()
 	return redirect(url_for('home'))
 	
 @app.route('/generate')

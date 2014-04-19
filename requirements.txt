@@ -11,3 +11,6 @@ nose==1.1.2
 oauth2==1.5.211
 simplejson==2.3.2
 wsgiref==0.1.2
+flask-mongoengine==0.6
+mongoengine==0.7.4
+pymongo==2.3
