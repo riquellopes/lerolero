@@ -34,6 +34,7 @@ class LeroLero(object):
 		return (''.join( re.findall('(?s)<blockquote id="frase_aqui">(.*?)</blockquote>', rs) )).decode('utf-8')
 
 # Date current:
+import datetime
 now = datetime.datetime.now
 		
 class Pensador(db.Document):
