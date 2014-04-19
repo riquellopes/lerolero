@@ -46,7 +46,7 @@ class Pensador(db.Document):
 oauth = OAuth()
 facebook = oauth.remote_app('facebook',
     base_url='https://graph.facebook.com/',
-    request_token_url=None,
+    #request_token_url=None,
     access_token_url='/oauth/access_token',
     authorize_url='https://www.facebook.com/dialog/oauth',
     consumer_key=app.config['FACEBOOK_CONSUMER_KEY'],
@@ -79,7 +79,7 @@ def facebook_authorized(resp):
 		)
 	session['oauth_token'] = (resp['access_token'], '')
 	me = facebook.get('/me')
-	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email']).save()
+	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['name']).save()
 	return redirect(url_for('home'))
 	
 @app.route('/generate')
