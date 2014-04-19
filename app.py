@@ -51,7 +51,7 @@ facebook = oauth.remote_app('facebook',
     authorize_url='https://www.facebook.com/dialog/oauth',
     consumer_key=app.config['FACEBOOK_CONSUMER_KEY'],
     consumer_secret=app.config['FACEBOOK_CONSUMER_SECRET'],
-    request_token_params={'scope': ('email', 'publish_actions', )}
+    request_token_params={'scope':'email, publish_actions'}
 )
 
 @app.route('/')
@@ -79,8 +79,7 @@ def facebook_authorized(resp):
 		)
 	session['oauth_token'] = (resp['access_token'], '')
 	me = facebook.get('/me')
-	p = Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email'])
-	p.insert()
+	Pensador(id=me.data['id'], email=me.data['email'], name=me.data['email']).save()
 	return redirect(url_for('home'))
 	
 @app.route('/generate')
