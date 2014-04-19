@@ -23,8 +23,9 @@
 		$('#new-lero-lero').click(function(){
 			$('button').attr('disabled', true);
 			$.get('/generate', function(rs){
-				$('textarea').val( rs );
-				$('#p-lero-lero').html( rs );
+				var pensamento = '"'+rs+'"';
+				$('textarea').val( pensamento );
+				$('#p-lero-lero').html( pensamento );
 				$('button').attr('disabled', false);
 			});
 		});
@@ -40,7 +41,7 @@
 								  'src': '',
 								  'href': window.location.href
 						}],*/
-			       		href: 'http://github.com/facebook/connect-js'     
+			       		href: window.location.href     
 					},     
 					action_links: [{
 						 text: 'Code', 
@@ -72,11 +73,12 @@
 			<p id='p-lero-lero'>"{{lerolero|safe}}"</p>	
 			<div>
 				<textarea name='lero-lero' style='display:none;'>{{lerolero|safe}}</textarea>
+				{#
 				{% if not user_loggend %}
 					<a href="{{url_for('login')}}" id='post-on-my-timeline' class='btn btn-success'>Logar com Facebook</a>
 				{% else %}
 					<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Agendar</button>
-				{% endif %}
+				{% endif %} #}
 				<button class="btn btn-primary" id='pensar-agora'>Pensar agora</button>
 				<button type='button' name='new-lero-lero' id='new-lero-lero' class='btn btn-primary'>Novo Pensamento</button>
 			</div>
@@ -89,7 +91,7 @@
 			 </div>
 			 <div class="col-lg-6">
 			    <h4>Como funciona:</h4>
-			    <p>Basta se conectar ao app com seu Facebook e cadastrar a hora que você deseja que seu pensamento diário seja publicado.</p>
+			    <p><s>Basta se conectar ao app com seu Facebook e cadastrar a hora que você deseja que seu pensamento diário seja publicado.</s></p>
 			 </div>
 		</div>
 		
