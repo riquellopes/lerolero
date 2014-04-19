@@ -10,5 +10,4 @@ mock==0.7.2
 nose==1.1.2
 oauth2==1.5.211
 simplejson==2.3.2
-twill==0.9
 wsgiref==0.1.2
