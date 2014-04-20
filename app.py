@@ -78,7 +78,7 @@ def facebook_authorized(resp):
 			request.args['error_description']
 		)
 	session['oauth_token'] = (resp['access_token'], '')
-	#me = facebook.get('/me')
+	me = facebook.get('/me')
 	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['name']).save()
 	return redirect(url_for('home'))
 	
