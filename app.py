@@ -51,7 +51,7 @@ facebook = oauth.remote_app('facebook',
     authorize_url='https://www.facebook.com/dialog/oauth',
     consumer_key=app.config['FACEBOOK_CONSUMER_KEY'],
     consumer_secret=app.config['FACEBOOK_CONSUMER_SECRET'],
-    request_token_params={'scope':'email, publish_actions'}
+    request_token_params={'scope':'email'}#, publish_actions, offline_access
 )
 
 @app.route('/')
