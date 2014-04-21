@@ -82,7 +82,7 @@ def facebook_authorized():
 #	session['oauth_token'] = (resp['access_token'], '')
 #	me = facebook.get('/me')
 	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['name']).save()
-	cookie = facebook.get_user_from_cookie(request.cookie, app.config['FACEBOOK_CONSUMER_KEY'], app.config['FACEBOOK_CONSUMER_SECRET'])
+	cookie = facebook.get_user_from_cookie(request.cookies, app.config['FACEBOOK_CONSUMER_KEY'], app.config['FACEBOOK_CONSUMER_SECRET'])
 	if cookie:
 		pensador = Pensador.objects(id=cookie["id"]).first()
 		if not pensador:
