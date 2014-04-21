@@ -58,6 +58,16 @@
 		    showInputs: false,
 		    minuteStep: 5
 	    });
+	
+		$("#post-on-my-timeline").click(function(){
+			FB.login(function(r){
+				if( r.authResponse ){
+					console.log("Logado.");
+				}else{
+					console.log("Não logado.");
+				}
+			}, {scope:'email, publish_actions'});
+		});
 	});
 </script>
 <body>
@@ -80,7 +90,7 @@
 			<div>
 				<textarea name='lero-lero' style='display:none;'>{{lerolero|safe}}</textarea>
 				{% if not user_loggend %}
-					<a href="{{url_for('login')}}" id='post-on-my-timeline' class='btn btn-success'>Logar com Facebook</a>
+					<a href="#" id='post-on-my-timeline' class='btn btn-success'>Logar com Facebook</a>
 				{% else %}
 					<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Agendar Pensamento</button>
 				{% endif %}
