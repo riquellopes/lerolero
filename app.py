@@ -3,7 +3,6 @@ import urllib2
 import re
 import facebook
 from flask import Flask, render_template, request, session, url_for, redirect
-#from flask.ext.oauth import OAuth
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine
 
 """
@@ -46,17 +45,6 @@ class Pensador(db.Document):
 	profile_url = db.StringField(required=True)
 	access_token = db.StringField(required=True)
 	
-#oauth = OAuth()
-#facebook = oauth.remote_app('facebook',
-#    base_url='https://graph.facebook.com/',
-#    request_token_url=None,
-#    access_token_url='/oauth/access_token',
-#    authorize_url='https://www.facebook.com/dialog/oauth',
-#    consumer_key=app.config['FACEBOOK_CONSUMER_KEY'],
-#    consumer_secret=app.config['FACEBOOK_CONSUMER_SECRET'],
-#    request_token_params={'scope':'email'}#, publish_actions, offline_access
-#)
-
 @app.route('/')
 def home():
 	if app.config['TEST'] == True:
@@ -67,21 +55,9 @@ def home():
 	url_original=__URL_ORIGINAL__
 	url_git=__URL_GIT__
 	return render_template('template.html', **locals())
-
-#@app.route('/login')
-#def login():
-	#return facebook.authorize(callback=url_for('facebook_authorized', next=request.args.get('next') or request.referrer or None, _external=True))
 	
 @app.route('/login/authorized')
 def facebook_authorized():
-#	if resp is None:
-#		return 'Access denied: reason=%s error=%s' (
-#			request.args['error_reason'],
-#			request.args['error_description']
-#		)
-#	session['oauth_token'] = (resp['access_token'], '')
-#	me = facebook.get('/me')
-	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['name']).save()
 	cookie = facebook.get_user_from_cookie(request.cookies, app.config['FACEBOOK_CONSUMER_KEY'], app.config['FACEBOOK_CONSUMER_SECRET'])
 	if cookie:
 		pensador = Pensador.objects(id=cookie["id"]).first()
@@ -102,10 +78,6 @@ def generate():
 @app.route('/timeline-post', methods=['POST'])
 def timeline_post():
 	return request.form['lero']
-
-#@facebook.tokengetter
-#def get_facebook_token():
-#	return session.get('user')
 
 @app.context_processor
 def user_loggend():

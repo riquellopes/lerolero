@@ -69,6 +69,10 @@
 			}, {scope:'email, publish_actions'});
 		});
 	});
+	
+	window.fbAsyncInit = function(){
+		FB.init({appId:'{{config['FACEBOOK_CONSUMER_KEY']}}', status: true, cookie: true, xfbml: true});
+	}
 </script>
 <body>
 	<div class='container'>
