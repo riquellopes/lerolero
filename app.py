@@ -60,7 +60,7 @@ def home():
 def facebook_authorized():
 	cookie = facebook.get_user_from_cookie(request.cookies, app.config['FACEBOOK_CONSUMER_KEY'], app.config['FACEBOOK_CONSUMER_SECRET'])
 	if cookie:
-		pensador = Pensador.objects(id=cookie["id"]).first()
+		pensador = Pensador.objects(id=cookie["uid"]).first()
 		if not pensador:
 			graph = facebook.GraphAPI(cookie['access_token'])
 			me = graph.get_object('me')
