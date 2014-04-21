@@ -80,6 +80,11 @@ def generate():
 def timeline_post():
 	return request.form['lero']
 
+@app.route('/logout')
+def logout():
+	session['user'] = None
+	return redirect(url_for('home'))
+
 @app.context_processor
 def user_loggend():
 	return dict(user_loggend=session.get('user'))
