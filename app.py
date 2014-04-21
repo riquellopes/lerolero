@@ -1,8 +1,9 @@
 # coding: utf-8
 import urllib2
 import re
+import facebook
 from flask import Flask, render_template, request, session, url_for, redirect
-from flask.ext.oauth import OAuth
+#from flask.ext.oauth import OAuth
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine
 
 """
@@ -42,17 +43,19 @@ class Pensador(db.Document):
 	name = db.StringField(required=True)
 	email = db.EmailField(required=True, unique=True)
 	date_created=db.DateTimeField(default=now())
+	profile_url = db.StringField(required=True)
+	access_token = db.StringField(required=True)
 	
-oauth = OAuth()
-facebook = oauth.remote_app('facebook',
-    base_url='https://graph.facebook.com/',
-    request_token_url=None,
-    access_token_url='/oauth/access_token',
-    authorize_url='https://www.facebook.com/dialog/oauth',
-    consumer_key=app.config['FACEBOOK_CONSUMER_KEY'],
-    consumer_secret=app.config['FACEBOOK_CONSUMER_SECRET'],
-    request_token_params={'scope':'email'}#, publish_actions, offline_access
-)
+#oauth = OAuth()
+#facebook = oauth.remote_app('facebook',
+#    base_url='https://graph.facebook.com/',
+#    request_token_url=None,
+#    access_token_url='/oauth/access_token',
+#    authorize_url='https://www.facebook.com/dialog/oauth',
+#    consumer_key=app.config['FACEBOOK_CONSUMER_KEY'],
+#    consumer_secret=app.config['FACEBOOK_CONSUMER_SECRET'],
+#    request_token_params={'scope':'email'}#, publish_actions, offline_access
+#)
 
 @app.route('/')
 def home():
@@ -65,21 +68,31 @@ def home():
 	url_git=__URL_GIT__
 	return render_template('template.html', **locals())
 
-@app.route('/login')
-def login():
-	return facebook.authorize(callback=url_for('facebook_authorized', next=request.args.get('next') or request.referrer or None, _external=True))
+#@app.route('/login')
+#def login():
+	#return facebook.authorize(callback=url_for('facebook_authorized', next=request.args.get('next') or request.referrer or None, _external=True))
 	
 @app.route('/login/authorized')
-@facebook.authorized_handler
-def facebook_authorized(resp):
-	if resp is None:
-		return 'Access denied: reason=%s error=%s' (
-			request.args['error_reason'],
-			request.args['error_description']
-		)
-	session['oauth_token'] = (resp['access_token'], '')
-	me = facebook.get('/me')
+def facebook_authorized():
+#	if resp is None:
+#		return 'Access denied: reason=%s error=%s' (
+#			request.args['error_reason'],
+#			request.args['error_description']
+#		)
+#	session['oauth_token'] = (resp['access_token'], '')
+#	me = facebook.get('/me')
 	#Pensador(id=me.data['id'], email=me.data['email'], name=me.data['name']).save()
+	cookie = facebook.get_user_from_cookie(request.cookie, app.config['FACEBOOK_CONSUMER_KEY'], app.config['FACEBOOK_CONSUMER_SECRET'])
+	if cookie:
+		pensador = Pensador.objects(id=cookie["id"]).first()
+		if not pensador:
+			graph = facebook.GraphAPI(cookie['access_token'])
+			me = graph.get_object('me')
+			Pensador(id=str(me["id"]), name=me['name'], email=me['email'], profile_url=me['link'], access_token=me['access_token']).save()
+		elif pensador.access_token != cookie["access_token"]:
+			pensador.acess_token = cookie["access_token"];
+			pensador.save()
+		session['user']=dict(name=pensador.name, profile_url=pensador.profile_url, id=pensador.id, acess_token=pensador.access_token)	
 	return redirect(url_for('home'))
 	
 @app.route('/generate')
@@ -90,10 +103,10 @@ def generate():
 def timeline_post():
 	return request.form['lero']
 
-@facebook.tokengetter
-def get_facebook_token():
-	return session.get('facebook_token')
+#@facebook.tokengetter
+#def get_facebook_token():
+#	return session.get('user')
 
 @app.context_processor
 def user_loggend():
-	return dict(user_loggend=session.get('facebook_token'))
+	return dict(user_loggend=session.get('user'))

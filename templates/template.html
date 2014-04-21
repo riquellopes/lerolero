@@ -60,11 +60,11 @@
 	    });
 	
 		$("#post-on-my-timeline").click(function(){
+			$('button').attr('disabled', true);
 			FB.login(function(r){
 				if( r.authResponse ){
-					console.log("Logado.");
-				}else{
-					console.log("Não logado.");
+					$('button').attr('disabled', false);
+					window.location.href = "{{url_for('facebook_authorized')}}"
 				}
 			}, {scope:'email, publish_actions'});
 		});
