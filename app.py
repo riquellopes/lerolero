@@ -64,7 +64,8 @@ def facebook_authorized():
 		if not pensador:
 			graph = facebook.GraphAPI(cookie['access_token'])
 			me = graph.get_object('me')
-			Pensador(id=str(me["id"]), name=me['name'], email=me['email'], profile_url=me['link'], access_token=me['access_token']).save()
+			pensador = Pensador(id=str(me["id"]), name=me['name'], email=me['email'], profile_url=me['link'], access_token=cookie['access_token'])
+			pensador.save()
 		elif pensador.access_token != cookie["access_token"]:
 			pensador.acess_token = cookie["access_token"];
 			pensador.save()
