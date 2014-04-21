@@ -82,7 +82,7 @@ def timeline_post():
 
 @app.route('/logout')
 def logout():
-	session['user'] = None
+	session.clear()
 	return redirect(url_for('home'))
 
 @app.context_processor
