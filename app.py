@@ -2,8 +2,10 @@
 import urllib2
 import re
 import facebook
-from flask import Flask, render_template, request, session, url_for, redirect
-from flask_mongoengine import QuerySet, ValidationError, MongoEngine
+import json
+from flask import Flask, render_template, request, session, url_for, redirect, jsonify, make_response, Response
+from flask_mongoengine import QuerySet, ValidationError, MongoEngine, MongoEngineSessionInterface
+from flask_debugtoolbar import DebugToolbarExtension
 
 """
 	Crédito aos autores::
@@ -19,6 +21,8 @@ __URL_GIT__='http://henriquelopes.com.br'
 app = Flask(__name__)
 app.config.from_object('settings')
 db=MongoEngine(app)
+app.session_interface = MongoEngineSessionInterface(db)
+toolbar = DebugToolbarExtension(app)
 
 class LeroLeroException(Exception):
 	pass
@@ -33,21 +37,32 @@ class LeroLero(object):
 			raise LeroLeroException('LeroLero not online.')
 		return (''.join( re.findall('(?s)<blockquote id="frase_aqui">(.*?)</blockquote>', rs) )).decode('utf-8')
 
-# Date current:
 import datetime
 now = datetime.datetime.now
-		
+	
 class Pensador(db.Document):
+	"""
+		Content responsável em armazenar todos os pensadores::
+	"""
 	id = db.StringField(primary_key=True)
 	name = db.StringField(required=True)
 	email = db.EmailField(required=True, unique=True)
 	date_created=db.DateTimeField(default=now())
-	profile_url = db.StringField(required=True)
+	profile_url = db.URLField(required=True, unique=True)
 	access_token = db.StringField(required=True)
-	
+
+class Agendamento(db.Document):
+	"""
+		Content responsável por todos os agendamentos de pensamentos::
+	"""
+	pensador=db.ReferenceField(Pensador, primary_key=True)
+	weeks=db.ListField(required=True)
+	times=db.ListField(required=True)
+		
 @app.route('/')
 def home():
-	if app.config['TEST'] == True:
+	if app.config['DEBUG'] == True:
+		app.logger.info("Em modo teste.")
 		lerolero = "Evidentemente, a execucao dos pontos do programa agrega valor ao estabelecimento dos modos de operacao convencionais.";
 	else:
 		lerolero=LeroLero.get()
@@ -74,17 +89,22 @@ def facebook_authorized():
 	
 @app.route('/generate')
 def generate():
+	app.logger.info("Gerando um novo pensamento.")
 	return LeroLero.get()
-
-@app.route('/timeline-post', methods=['POST'])
-def timeline_post():
-	return request.form['lero']
 
 @app.route('/logout')
 def logout():
 	session.clear()
 	return redirect(url_for('home'))
 
+@app.route('/weeks.json')
+def weeks():
+	return Response( json.dumps((app.config['WEEKS'])), mimetype='application/json')
+	
+@app.route('/times.json')
+def times():
+	return Response( json.dumps((app.config['TIMES'])), mimetype='application/json')
+		
 @app.context_processor
 def user_loggend():
 	return dict(user_loggend=session.get('user'))
