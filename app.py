@@ -4,7 +4,7 @@ import re
 import facebook
 import json
 from flask import Flask, render_template, request, session,\
- url_for, redirect, jsonify, make_response, Response, g
+ url_for, redirect, jsonify, make_response, Response
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine, MongoEngineSessionInterface
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -99,7 +99,6 @@ def facebook_authorized():
 			pensador.save()
 		session.permanent = True
 		session['user']=dict(name=pensador.name, profile_url=pensador.profile_url, id=pensador.id, acess_token=pensador.access_token)
-		g.user = pensador
 	return redirect(url_for('home'))
 	
 @app.route('/generate')
@@ -124,7 +123,8 @@ def times():
 def schedule():
 	if request.method == 'POST':
 		tags = Agendamento.create_tags(request.form)
-		Agendamento(pensador=g.user, times_tag=tags).save()
+		pensador = Pensador.objects(id=session['user'].id)
+		Agendamento(pensador=pensador, times_tag=tags).save()
 	return ""
 			
 @app.context_processor
