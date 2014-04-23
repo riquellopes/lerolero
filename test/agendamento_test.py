@@ -39,7 +39,25 @@ class AgendamentoTest(unittest.TestCase):
 		"""
 		assert_equals([], Agendamento.create_tags(None))
 	
+	def test_caso_um_tempo_seja_passado_sem_uma_marcacao_ele_deve_ser_despensado(self):
+		"""
+			Caso um tempo seja passado sem uma marcação ele de ser despensado.
+		"""
+		times = {
+			'time-0':'1',
+			'time-1':'',
+			'time-2':''
+		}
+		tags = [
+			'time-0|1',
+		]
+		tags_created = Agendamento.create_tags(times)
+		assert_equals(tags, tags_created)
+		
 	def test_caso_todas_as_informacoes_esteja_ok_um_agendamento_deve_ser_criado(self):
+		"""
+			Caso todos as informações estejam ok um agendamento deve ser criado.
+		"""
 		tags = [
 			'time-0|1', 'time-1|1,0', 'time-2|2,1,0',
 		]

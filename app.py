@@ -68,7 +68,8 @@ class Agendamento(db.Document):
 			return []
 		tags=[]
 		for time in times:
-			tags.append("{0}|{1}".format(time, times[time]))
+			if times[time]:
+				tags.append("{0}|{1}".format(time, times[time]))
 		tags.sort()
 		return tags
 		
