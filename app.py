@@ -148,11 +148,14 @@ def times():
 def schedule():
 	app.logger.info("start schedule")
 	if request.method == 'POST':
-		tags = Agendamento.create_tags(request.form)
-		pensador = Pensador.objects(id=session['user']['id']).first()
-		Agendamento(pensador=pensador, times_tag=tags).save()
-		app.logger.info("salved schedule")
-	return ""
+		try:
+			tags = Agendamento.create_tags(request.form)
+			pensador = Pensador.objects(id=session['user']['id']).first()
+			Agendamento(pensador=pensador, times_tag=tags).save()
+			app.logger.info("salved schedule")
+		except ValidationError:
+			return jsonify(message='Houve um error ao tentar realizar o agendamento.', status=500)
+	return jsonify(message='Agendamento realizado com sucesso.', status=200)
 	
 @app.context_processor
 def user_loggend():
