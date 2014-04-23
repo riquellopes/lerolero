@@ -70,6 +70,16 @@
 				}
 			}, {scope:'email, publish_actions, manage_pages'});
 		});
+		
+		$('#save-changes').click(function(){
+			$.ajax({
+				type:'POST',
+				url:"{{url_for('schedule')}}",
+				data:$('form').serialize()
+			}).done(function(){
+				$('[data-dismiss=modal]').click();
+			});
+		});
 	});
 	
 	window.fbAsyncInit = function(){
@@ -155,68 +165,35 @@
 		      </div>
 		      <div class="modal-body">
 				<form class="form-horizontal" role="form" onsubmit="return false;">
-					<div class="form-group">
-						<label for='days' class='col-sm-2 control-label'>Dias:</label>
-						<div class='col-sm-10 input-100'>
-							<input type='text' id='input-weeks'>
-							<script>
-								$(function(){
-									$('#input-weeks').tagsinput({
-										itemValue: 'value',
-										itemText: 'text'
+					{#$('#input-weeks').tagsinput('add', { "value": 1 , "text": "Amsterdam"  });#}
+					{% for w in config['TIMES'] %}
+					   <div class="form-group">
+							<label for='status' class="col-sm-2 control-label">{{w.text}}:</label>
+							<div class='col-sm-10 input-100'>
+								<input type='text' id='input-times-{{w.value}}' name='times-{{w.value}}'>
+								<script>
+									$(function(){
+										$('#input-times-{{w.value}}').tagsinput({
+											itemValue: 'value',
+											itemText: 'text'
+										});
+										
+										$('#input-times-{{w.value}}').tagsinput('input').typeahead({
+											valueKey:'text',
+											prefetch:'weeks.json',
+											{% raw %}
+												template:"<p>{{text}}</p>",
+											{% endraw %}
+											engine:Hogan
+										}).bind('typeahead:selected', $.proxy(function (obj, datum) {
+												this.tagsinput('add', datum);
+												this.tagsinput('input').typeahead('setQuery', '');
+										}, $('#input-times-{{w.value}}')));
 									});
-									
-									//$('#input-weeks').tagsinput('add', { "value": 1 , "text": "Amsterdam"  });
-									{% raw %}
-									$('#input-weeks').tagsinput('input').typeahead({
-										valueKey:'text',
-										prefetch:'weeks.json',
-										template:"<p>{{text}}</p>",
-										engine:Hogan
-									}).bind('typeahead:selected', $.proxy(function (obj, datum) {
-										this.tagsinput('add', datum);
-										this.tagsinput('input').typeahead('setQuery', '');
-									}, $('#input-weeks')));
-									{% endraw %}
-								});
-							</script>
-							<span class="help-block">Dias da semana.</span>
+								</script>
+							</div>
 						</div>
-					</div>
-					<div class="form-group">
-						<label for='time' class="col-sm-2 control-label">Horário:</label>
-						<div class='col-sm-10 input-100'>
-							<input type='text' id='input-times'>
-							<script>
-								$(function(){
-									$('#input-times').tagsinput({
-										itemValue: 'value',
-										itemText: 'text'
-									});
-									
-									{% raw %}
-									$('#input-times').tagsinput('input').typeahead({
-										valueKey:'text',
-										prefetch:'times.json',
-										template:"<p>{{text}}</p>",
-										engine:Hogan
-									}).bind('typeahead:selected', $.proxy(function (obj, datum) {
-											this.tagsinput('add', datum);
-											this.tagsinput('input').typeahead('setQuery', '');
-									}, $('#input-times')));
-									{% endraw %}
-								});
-							</script>
-							<span class="help-block">Horário do pensamento.</span>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for='status' class="col-sm-2 control-label">Ativo</label>
-						<div class='col-sm-10'>
-							<input type='checkbox' name='status' id='status' checked='checked'/>
-							<span class="help-block">Ativa ou desativa pensamentos diários.</span>
-						</div>
-					</div>	
+					{% endfor%}
 				</form>
 		      </div>
 		      <div class="modal-footer">

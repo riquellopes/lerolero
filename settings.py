@@ -3,6 +3,7 @@ try:
 	from local_config import *
 except ImportError:
 	from os import path, environ
+	from datetime import timedelta
 	SECRET_KEY=environ.get('SECRET_KEY')
 	CONSUMER_SECRET=environ.get('CONSUMER_SECRET')
 	CONSUMER_KEY=environ.get('CONSUMER_KEY')
@@ -16,14 +17,15 @@ except ImportError:
 	MONGODB_HOST=environ.get('MONGODB_HOST')
 	MONGODB_PORT=53698
 	DEBUG_TB_ENABLED = False
+	PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)
 FACEBOOK_URL_TOKEN="https://graph.facebook.com/oauth/access_token?client_id={0}&client_secret={1}&grant_type=client_credentials".format(FACEBOOK_CONSUMER_KEY, FACEBOOK_CONSUMER_SECRET)
 WEEKS = [
 	{'value':0, 'text':'Domingo'},
-	{'value':1, 'text':'Segunda-Feira'},
-	{'value':2, 'text':'Terça-Feira'},
-	{'value':3, 'text':'Quarta-Feira'},
-	{'value':4, 'text':'Quinta-Feira'},
-	{'value':5, 'text':'Sexta-Feira'},
+	{'value':1, 'text':'Segunda'},
+	{'value':2, 'text':'Terça'},
+	{'value':3, 'text':'Quarta'},
+	{'value':4, 'text':'Quinta'},
+	{'value':5, 'text':'Sexta'},
 	{'value':6, 'text':'Sábado'},
 ]
 
