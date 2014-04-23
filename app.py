@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, session,\
  url_for, redirect, jsonify, make_response, Response
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine, MongoEngineSessionInterface
 from flask_debugtoolbar import DebugToolbarExtension
+from decorator import login_required
 
 """
 	Crédito aos autores::
@@ -142,7 +143,8 @@ def times():
 	app.logger.info("Horarios recuperado")
 	return Response( json.dumps((app.config['TIMES'])), mimetype='application/json')
 
-@app.route('/schedule', methods=['POST'])
+@app.route('/schedule', methods=['POST', 'GET'])
+@login_required
 def schedule():
 	app.logger.info("start schedule")
 	if request.method == 'POST':
@@ -151,7 +153,7 @@ def schedule():
 		Agendamento(pensador=pensador, times_tag=tags).save()
 		app.logger.info("salved schedule")
 	return ""
-			
+	
 @app.context_processor
 def user_loggend():
 	return dict(user_loggend=session.get('user'))
