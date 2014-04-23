@@ -123,7 +123,7 @@ def times():
 def schedule():
 	if request.method == 'POST':
 		tags = Agendamento.create_tags(request.form)
-		pensador = Pensador.objects(id=session['user'].id)
+		pensador = Pensador.objects(id=session['user']['id']).first()
 		Agendamento(pensador=pensador, times_tag=tags).save()
 	return ""
 			
