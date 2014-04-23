@@ -79,9 +79,9 @@
 				url:"{{url_for('schedule')}}",
 				data:$('form').serialize()
 			}).done(function(){
-				$('[data-dismiss=modal]').click();
+				$('[data-dismiss=modal]').attr('disabled', false).click();
 			}).fail(function(){
-				$('[data-dismiss=modal]').click();
+				$('[data-dismiss=modal]').attr('disabled', false).click();
 			}).always(function(){
 				$('button').attr('disabled', false);
 			});

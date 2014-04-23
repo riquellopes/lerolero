@@ -129,7 +129,7 @@ def generate():
 @app.route('/logout')
 def logout():
 	session.clear()
-	app.logger.info("Sessão destruida.")
+	app.logger.info("End session.")
 	return redirect(url_for('home'))
 
 @app.route('/weeks.json')
@@ -144,12 +144,12 @@ def times():
 
 @app.route('/schedule', methods=['POST'])
 def schedule():
-	app.logger.info("Informações sobre agendamento")
+	app.logger.info("start schedule")
 	if request.method == 'POST':
 		tags = Agendamento.create_tags(request.form)
 		pensador = Pensador.objects(id=session['user']['id']).first()
 		Agendamento(pensador=pensador, times_tag=tags).save()
-		app.logger.info("Informações salvas")
+		app.logger.info("salved schedule")
 	return ""
 			
 @app.context_processor
