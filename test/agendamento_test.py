@@ -7,8 +7,13 @@ from app import Agendamento, Pensador
 class AgendamentoTest(unittest.TestCase):
 	
 	def setUp(self):
-		self.pensador = Pensador.objects.filter(id='1').first()
-		
+		p = Pensador(id='00005', name='Jonas', email='joca@gmail.com', access_token="123456", profile_url="http://j.com")
+		p.save()
+		self.pensador = p
+	
+	def tearDown(self):
+		Pensador.objects(id='00005').delete()
+			
 	def test_caso_uma_lista_de_horarios_tags_devem_ser_criadas(self):
 		"""
 			Caso uma lista de horarios seja passada ela deve ser transformada em tags.
@@ -39,6 +44,27 @@ class AgendamentoTest(unittest.TestCase):
 		"""
 		assert_equals([], Agendamento.create_tags(None))
 	
+	def test_e_necessario_relisar_a_engenharia_reversa_das_tags(self):
+		times = {
+			'time-0':['1'],
+			'time-1':['1','0'],
+			'time-2':['2','1','0']
+		}
+		tags = [
+			'time-0|1', 'time-1|1,0', 'time-2|2,1,0',
+		]
+		times_created = Agendamento.create_times(tags)
+		assert_equals(times, times_created)
+	
+	def test_caso_seja_passado_tags_em_branco_uma_lista_vazia_e_recuperada(self):
+		times = {}
+		tags = []
+		times_created = Agendamento.create_times(times)
+		assert_equals(times, times_created)
+	
+	def test_caso_seja_passado_none_tambem_deve_ser_recuperado_uma_lista_vazia(self):
+		assert_equals({}, Agendamento.create_times(None))
+				
 	def test_caso_um_tempo_seja_passado_sem_uma_marcacao_ele_deve_ser_despensado(self):
 		"""
 			Caso um tempo seja passado sem uma marcação ele de ser despensado.

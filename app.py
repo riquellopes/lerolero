@@ -60,11 +60,11 @@ class Agendamento(db.Document):
 	times_tag=db.ListField(required=True)
 	
 	@staticmethod
-	def create_tags(times):
+	def create_tags(times=None):
 		"""
 			Método cria tags com os horários que foram selecionandos pelo pensador::
 		"""
-		if times is None:
+		if times is None or times is "":
 			return []
 		tags=[]
 		for time in times:
@@ -72,6 +72,19 @@ class Agendamento(db.Document):
 				tags.append("{0}|{1}".format(time, times[time]))
 		tags.sort()
 		return tags
+	
+	@staticmethod
+	def create_times(tags=None):
+		"""
+			Método cria times para a template.
+		"""
+		if tags is None or tags is "":
+			return {}
+		times = {}
+		for tag in tags:
+			index,value = tag.encode('utf8').split('|')
+			times[index] = value.encode('utf8').split(',')
+		return times
 		
 @app.route('/')
 def home():
@@ -83,6 +96,12 @@ def home():
 	url_lerolero=__URL__
 	url_original=__URL_ORIGINAL__
 	url_git=__URL_GIT__
+	try:
+		pensador = Pensador.objects(id=session['user']['id']).first()
+		agendamento = Agendamento.objects(pensador=pensador).first()
+		times = Agendamento.create_times(agendamento.times_tag)
+	except:
+		pass
 	return render_template('template.html', **locals())
 	
 @app.route('/login/authorized')
@@ -110,22 +129,27 @@ def generate():
 @app.route('/logout')
 def logout():
 	session.clear()
+	app.logger.info("Sessão destruida.")
 	return redirect(url_for('home'))
 
 @app.route('/weeks.json')
 def weeks():
+	app.logger.info("Dias da semana recuperado")
 	return Response( json.dumps((app.config['WEEKS'])), mimetype='application/json')
 	
 @app.route('/times.json')
 def times():
+	app.logger.info("Horarios recuperado")
 	return Response( json.dumps((app.config['TIMES'])), mimetype='application/json')
 
 @app.route('/schedule', methods=['POST'])
 def schedule():
+	app.logger.info("Informações sobre agendamento")
 	if request.method == 'POST':
 		tags = Agendamento.create_tags(request.form)
 		pensador = Pensador.objects(id=session['user']['id']).first()
 		Agendamento(pensador=pensador, times_tag=tags).save()
+		app.logger.info("Informações salvas")
 	return ""
 			
 @app.context_processor

@@ -1,0 +1,6 @@
+{% macro render_week(input, weeks) %}
+	{% for week in weeks %}
+		{% set text = config['WEEKS'][week|int]['text'].decode('utf-8').strip() %}
+		$('#input-times-{{input}}').tagsinput('add', {text:'{{text}}', value:{{week}} });
+	{% endfor %}
+{% endmacro %}

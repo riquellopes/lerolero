@@ -72,6 +72,8 @@
 		});
 		
 		$('#save-changes').click(function(){
+			$('button').attr('disabled', true);
+			
 			$.ajax({
 				type:'POST',
 				url:"{{url_for('schedule')}}",
@@ -80,6 +82,8 @@
 				$('[data-dismiss=modal]').click();
 			}).fail(function(){
 				$('[data-dismiss=modal]').click();
+			}).always(function(){
+				$('button').attr('disabled', false);
 			});
 		});
 	});
@@ -168,6 +172,7 @@
 		      <div class="modal-body">
 				<form class="form-horizontal" role="form" onsubmit="return false;">
 					{#$('#input-weeks').tagsinput('add', { "value": 1 , "text": "Amsterdam"  });#}
+					{% from 'macro.html' import render_week %}
 					{% for w in config['TIMES'] %}
 					   <div class="form-group">
 							<label for='status' class="col-sm-2 control-label">{{w.text}}:</label>
@@ -179,6 +184,9 @@
 											itemValue: 'value',
 											itemText: 'text'
 										});
+										
+										{% set time = 'times-%s' % w.value %}
+										{{ render_week(input=w.value, weeks=times[time])}}
 										
 										$('#input-times-{{w.value}}').tagsinput('input').typeahead({
 											valueKey:'text',
@@ -220,7 +228,7 @@
 	<script>
 		setTimeout(function(){
 			$('[class=twitter-typeahead]').css("display","");
-		}, 4000);
+		}, 2000);
 	</script>
 </body>
 </html>
