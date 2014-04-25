@@ -3,6 +3,7 @@ import urllib2
 import re
 import facebook
 import json
+import hashlib
 from flask import Flask, render_template, request, session,\
  url_for, redirect, jsonify, make_response, Response
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine, MongoEngineSessionInterface
@@ -29,8 +30,10 @@ toolbar = DebugToolbarExtension(app)
 class LeroLeroException(Exception):
 	pass
 
-class LeroLero(object):
-
+class LeroLero(db.Document):
+	id = db.StringField(primary_key=True)
+	text = db.StringField(required=True)
+	
 	@staticmethod
 	def get():
 		"""Método recupera um novo lerolero::"""
@@ -38,7 +41,39 @@ class LeroLero(object):
 		if not re.search("frase_aqui", rs):
 			raise LeroLeroException('LeroLero not online.')
 		return (''.join( re.findall('(?s)<blockquote id="frase_aqui">(.*?)</blockquote>', rs) )).decode('utf-8')
-
+	
+#	def __repr__(self):
+#		"""
+#			Caso o pensamento não exista em nossa base o sistema tenta criar um, se o for necessario
+#			recupera algum especifico e não for encotrado o sistema vai levantar uma exception.
+#		"""
+#		if self.id is not None:
+#			self.objects(id=self.id).to_json()
+#			
+#		text = LeroLero.get()
+#		id = hashlib.md5(text).hexdigest()
+#		if self.id == id:
+#			self.text = text
+#		return json.dumps(self._data)
+	
+	@classmethod
+	def random(cls, **kwargs):
+		from random import randint
+		if randint(0,1):
+			"""
+				Caso o seja 1 o valor deve ser recuperado do banco
+			"""
+			return cls.objects(**kwargs)
+		else:
+			"""
+				Valor recuperado da web e parseado e salvo.
+			"""
+			cls.text = LeroLero.get()
+			cls.id = hashlib.md5(text).hexdigest()
+			
+			return 'Web'
+		
+		
 import datetime
 now = datetime.datetime.now
 	
@@ -102,7 +137,7 @@ def home():
 		agendamento = Agendamento.objects(pensador=pensador).first()
 		times = Agendamento.create_times(agendamento.times_tag)
 	except:
-		pass
+		times = []
 	return render_template('template.html', **locals())
 	
 @app.route('/login/authorized')

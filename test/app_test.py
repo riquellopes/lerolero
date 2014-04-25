@@ -3,8 +3,8 @@ import unittest
 from nose.tools import assert_true, assert_raises, assert_equals
 from mock import Mock, patch
 from app import app as _app
-from app import LeroLero, LeroLeroException
-from flask import session
+from app import LeroLero, LeroLeroException, Pensador
+import json
 import codecs
 
 class MockUrllib(object):
@@ -35,7 +35,14 @@ class LeroLeroTest(unittest.TestCase):
 	def test_caso_o_lero_nao_seja_encotrado_sistema_deve_levar_exception(self, lero):
 		lero.return_value = MockUrllib('lero_3.html')
 		assert_raises(LeroLeroException, LeroLero.get)
-
+	
+	@patch('app.urllib2.urlopen')
+	def test_deve_existir_a_possibilidade_criar_um_objeto_json(self, lero):
+		lero.return_value = MockUrllib('lero.html')
+		response = {"text": "Nao obstante, o fenomeno da Internet estimula a padronizacao das diretrizes de desenvolvimento para o futuro.", "id": "8f596ab15ffaed3c7ff2648c3ceb40b8"}
+		print LeroLero.random(id="100000079352090").only("id", "text").to_json()
+		assert_equals(response, LeroLero(id="8f596ab15ffaed3c7ff2648c3ceb40b8"))
+		
 class AppTest(unittest.TestCase):
 
 	def setUp(self):
