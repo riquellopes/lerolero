@@ -84,7 +84,7 @@ class Agendamento(db.Document):
 		Content responsável por todos os agendamentos de pensamentos::
 	"""
 	pensador=db.ReferenceField(Pensador, primary_key=True)
-	times_tag=db.ListField(required=True)
+	times_tag=db.ListField()
 	
 	@staticmethod
 	def create_tags(times=None):
@@ -179,7 +179,8 @@ def schedule():
 			pensador = Pensador.objects(id=session['user']['id']).first()
 			Agendamento(pensador=pensador, times_tag=tags).save()
 			app.logger.info("salved schedule")
-		except ValidationError:
+		except ValidationError as e:
+			app.logger.error(e)
 			return jsonify(message='Houve um error ao tentar realizar o agendamento.', status=500)
 	return jsonify(message='Agendamento realizado com sucesso.', status=200)
 	
