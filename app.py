@@ -4,6 +4,8 @@ import re
 import facebook
 import json
 import hashlib
+from math import ceil
+from random import random, choice
 from flask import Flask, render_template, request, session,\
  url_for, redirect, jsonify, make_response, Response
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine, MongoEngineSessionInterface
@@ -34,46 +36,35 @@ class LeroLero(db.Document):
 	id = db.StringField(primary_key=True)
 	text = db.StringField(required=True)
 	
-	@staticmethod
-	def get():
-		"""Método recupera um novo lerolero::"""
+	@classmethod
+	def get(cls):
+		"""Método recupera um novo lerolero na web."""
 		rs=urllib2.urlopen(__URL__).read()
 		if not re.search("frase_aqui", rs):
 			raise LeroLeroException('LeroLero not online.')
 		return (''.join( re.findall('(?s)<blockquote id="frase_aqui">(.*?)</blockquote>', rs) )).decode('utf-8')
-	
-#	def __repr__(self):
-#		"""
-#			Caso o pensamento não exista em nossa base o sistema tenta criar um, se o for necessario
-#			recupera algum especifico e não for encotrado o sistema vai levantar uma exception.
-#		"""
-#		if self.id is not None:
-#			self.objects(id=self.id).to_json()
-#			
-#		text = LeroLero.get()
-#		id = hashlib.md5(text).hexdigest()
-#		if self.id == id:
-#			self.text = text
-#		return json.dumps(self._data)
-	
+		
 	@classmethod
 	def random(cls, **kwargs):
-		from random import randint
-		if randint(0,1):
+		if choice([True, False]):
 			"""
-				Caso o seja 1 o valor deve ser recuperado do banco
+				1- Caso o seja 1 o valor deve ser recuperado do banco
 			"""
-			return cls.objects(**kwargs)
+			return cls.objects().limit(1).skip( cls._rand() )
 		else:
 			"""
-				Valor recuperado da web e parseado e salvo.
+				2- Valor recuperado da web parseado e salvo na nossa base
 			"""
-			cls.text = LeroLero.get()
-			cls.id = hashlib.md5(text).hexdigest()
+			__text = cls.get()
+			__id = hashlib.md5(__text).hexdigest()
+			cls.objects.insert(LeroLero(text=__text, id=__id))
+			return cls.objects(id=__id)
+	
+	@classmethod
+	def _rand(cls):
+		count = cls.objects().count()
+		return int( random() * count )
 			
-			return 'Web'
-		
-		
 import datetime
 now = datetime.datetime.now
 	

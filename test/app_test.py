@@ -5,6 +5,7 @@ from mock import Mock, patch
 from app import app as _app
 from app import LeroLero, LeroLeroException, Pensador
 import json
+from bson import json_util
 import codecs
 
 class MockUrllib(object):
@@ -39,9 +40,8 @@ class LeroLeroTest(unittest.TestCase):
 	@patch('app.urllib2.urlopen')
 	def test_deve_existir_a_possibilidade_criar_um_objeto_json(self, lero):
 		lero.return_value = MockUrllib('lero.html')
-		response = {"text": "Nao obstante, o fenomeno da Internet estimula a padronizacao das diretrizes de desenvolvimento para o futuro.", "id": "8f596ab15ffaed3c7ff2648c3ceb40b8"}
-		print LeroLero.random(id="100000079352090").only("id", "text").to_json()
-		assert_equals(response, LeroLero(id="8f596ab15ffaed3c7ff2648c3ceb40b8"))
+		rs = json_util.dumps({"_id": "8f596ab15ffaed3c7ff2648c3ceb40b8", "text": "Nao obstante, o fenomeno da Internet estimula a padronizacao das diretrizes de desenvolvimento para o futuro."}, sort_keys=True)
+		assert_equals(rs, LeroLero.random().only("id", "text").first().to_json())
 		
 class AppTest(unittest.TestCase):
 
