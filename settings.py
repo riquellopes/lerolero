@@ -37,3 +37,6 @@ TIMES = (
 	{'value':4, 'text':'04:00 PM'},
 	{'value':5, 'text':'08:00 PM'},
 )
+URL='http://www.lerolero.com/'
+URL_ORIGINAL='http://www.suicidiovirtual.net/dados/lerolero.html'
+URL_GIT='http://henriquelopes.com.br'

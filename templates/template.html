@@ -28,36 +28,56 @@
 	$(function(){
 		$('#new-lero-lero').click(function(){
 			$('button').attr('disabled', true);
-			$.get('/generate', function(rs){
-				var pensamento = '"'+rs+'"';
+			$.getJSON('/generate', function(data){
+				var pensamento = '"'+data.text+'"';
 				$('textarea').val( pensamento );
+				$('#pensamento-id').val( data.id );
 				$('#p-lero-lero').html( pensamento );
 				$('button').attr('disabled', false);
 			});
 		});
 		
-		$('#pensar-agora').click(function(){
-			FB.ui({method: 'stream.publish',
-				   display:'popup',
-			       message: 'getting educated about Facebook Connect',     
-				   attachment: {       
-						name: 'Pensamento do dia', 
-						description: $('#p-lero-lero').text(),
-						media: [{ 'type': 'image',
-								  'src': window.location.href.concat("static/img/platao.jpg"),
-								  'href': window.location.href
-						}],
-			       		href: window.location.href     
-					},     
-					action_links: [{
-						 text: 'Code', 
-						 href: 'http://github.com/facebook/connect-js'
-					}],
+		{% if not user_loggend %}
+			$('#pensar-agora').click(function(){
+				FB.ui({method: 'stream.publish',
+				   	display:'popup',
+			       	message: 'getting educated about Facebook Connect',     
+				   	attachment: {       
+							name: 'Pensamento do dia',
+							description: $('#p-lero-lero').text(),
+							media: [{ 'type': 'image',
+								  	  'src': "{{url_for('.static', filename='img/platao.jpg', _external=True)}}",
+								  	  'href': window.location.href
+						   }],
+			       	       href: window.location.href.concat($('#pensamento-id').val())
+					},
 					user_message_prompt: 'Share your thoughts about Connect'
-
+			 	});
 			});
-		});
-	
+		{% else %}
+			$("#pensar-agora").click(function(){
+				$('button').attr('disabled', true);
+				$('#ico-information').hide();
+				$('#load-ajax').show();
+				
+				$.getJSON("/thinking-now/".concat($('#pensamento-id').val()))
+				.done(function(r){
+					$('#load-ajax').hide();
+					$('#ico-information').removeClass('glyphicon-thumbs-down').removeClass('glyphicon-thumbs-up');
+					
+					if( r.status == 200){
+						$('#ico-information').addClass('glyphicon-thumbs-up').show();
+					}else{
+						$('#ico-information').addClass('glyphicon-thumbs-down').show();
+					}
+				})
+				.always(function(){
+					$('button').attr('disabled', false);
+					$('#load-ajax').hide();
+				});
+			});
+		{% endif %}
+		
 		$("#post-on-my-timeline").click(function(){
 			$('button').attr('disabled', true);
 			FB.login(function(r){
@@ -68,7 +88,7 @@
 				else{
 					$('button').attr('disabled', false);
 				}
-			}, {scope:'email, publish_actions, manage_pages'});
+				}, {scope:'email, publish_actions, manage_pages'});
 		});
 		
 		$('#save-changes').click(function(){
@@ -126,6 +146,7 @@
 					      <span class="caret"></span>
 					    </button>
 					    <ul class="dropdown-menu">
+						   {#<li><a href="javascript:;">Sugerir Lero</a></li>#}
 					      <li><a href="{{url_for('logout')}}">Logout</a></li>
 					    </ul>
 					  	</div>
@@ -139,13 +160,17 @@
 			    </div>
 		</nav>
 		<div class='jumbotron'>
-			<p id='p-lero-lero'>"{{lerolero|safe}}"</p>	
+			<p id='p-lero-lero'>"{{lero.text|safe}}"</p>	
 			<div>
-				<textarea name='lero-lero' style='display:none;'>{{lerolero|safe}}</textarea>
+				<textarea name='lero-lero' style='display:none;'>{{lero.text|safe}}</textarea>
+				<input type='hidden' value='{{lero.id}}' id='pensamento-id'/>
 				{% if user_loggend %}
-					<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Agendar Pensamento</button>
+					<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+						<span class="badge">Beta</span> Agendar Pensamento</button>
 				{% endif %}
-				<button class="btn btn-primary" id='pensar-agora'>Pensar agora</button>
+				<button class="btn btn-primary" id='pensar-agora'>
+					<span class='glyphicon' id='ico-information'></span>
+					<img src="{{url_for('.static', filename='img/ajax-loader.gif')}}" id='load-ajax' style='display:none;'> Pensar agora</button>
 				<button type='button' name='new-lero-lero' id='new-lero-lero' class='btn btn-primary'>Novo Pensamento</button>
 			</div>
 		</div>
@@ -217,7 +242,7 @@
 		
 		<footer>
 			<div>
-			Esse app para o facebook, é uma versão dos famosos geradores de <a href='{{url_lerolero}}'>lerolero</a> e <a href='{{url_original}}'>suicidiovirtual.</a><br />Autor: <a href='{{url_git}}'>@riquellopes</a>
+			Esse app para o facebook, é uma versão dos famosos geradores de <a href='{{config['URL']}}'>lerolero</a> e <a href='{{config['URL_ORIGINAL']}}'>suicidiovirtual.</a><br />Autor: <a href='{{config['URL_GIT']}}'>@riquellopes</a>
 			</div>
 			<div class="fb-like" data-href="http://geradordelerolero.herokuapp.com/" data-layout="standard" data-action="recommend" data-show-faces="true" data-share="true"></div>
 		</footer>

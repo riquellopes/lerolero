@@ -6,7 +6,6 @@ from app import app as _app
 from app import LeroLero, LeroLeroException, Pensador
 import json
 from bson import json_util
-import codecs
 
 class MockUrllib(object):
 
@@ -40,8 +39,8 @@ class LeroLeroTest(unittest.TestCase):
 	@patch('app.urllib2.urlopen')
 	def test_deve_existir_a_possibilidade_criar_um_objeto_json(self, lero):
 		lero.return_value = MockUrllib('lero.html')
-		rs = json_util.dumps({"_id": "8f596ab15ffaed3c7ff2648c3ceb40b8", "text": "Nao obstante, o fenomeno da Internet estimula a padronizacao das diretrizes de desenvolvimento para o futuro."}, sort_keys=True)
-		assert_equals(rs, LeroLero.random().only("id", "text").first().to_json())
+		rs = json_util.dumps({"id": "8f596ab15ffaed3c7ff2648c3ceb40b8", "text": "Nao obstante, o fenomeno da Internet estimula a padronizacao das diretrizes de desenvolvimento para o futuro."})
+		assert_equals(rs, LeroLero.objects(id='8f596ab15ffaed3c7ff2648c3ceb40b8').only("id", "text").first().to_json())
 		
 class AppTest(unittest.TestCase):
 
@@ -68,7 +67,8 @@ class AppTest(unittest.TestCase):
 			'time-2':'2,1,0'
 		}
 		r = self.app.post('/schedule', data=data, follow_redirects=True)
-		assert_true('<title>Gerador de LeroLero</title>' in str(r.data))
+		assert_true('<title>Redirecting...</title>' in str(r.data))
+		assert_equals(r.status, '403 FORBIDDEN')
 	
 	def test_caso_o_usuario_esteje_logado_ele_deve_ser_agendar_seus_pensamentos(self):
 		data = {
