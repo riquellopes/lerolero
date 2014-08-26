@@ -13,6 +13,7 @@ from flask_mongoengine import QuerySet, ValidationError, MongoEngine, MongoEngin
 from mongoengine import signals
 from flask_debugtoolbar import DebugToolbarExtension
 from decorator import login_required
+from flask.ext.cors import CORS, cross_origin
 
 """
 	Crédito aos autores::
@@ -26,6 +27,7 @@ db=MongoEngine(app)
 app.session_interface = MongoEngineSessionInterface(db)
 toolbar = DebugToolbarExtension(app)
 csrf = CsrfProtect(app)
+cors = CORS(app)
 
 class LeroLeroException(Exception):
 	pass
@@ -220,6 +222,7 @@ def facebook_authorized():
 	
 @app.route('/generate')
 @app.route('/generate/<leroid>')
+@cross_origin()
 def generate(leroid=None):
 	app.logger.info("Gerando um novo pensamento.")
 	if leroid:
