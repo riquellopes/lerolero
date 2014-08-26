@@ -8,7 +8,9 @@ from random import random, choice
 import facebook
 from flask import Flask, render_template, request, session,\
  url_for, redirect, jsonify, make_response, Response, abort
+from flask_wtf.csrf import CsrfProtect
 from flask_mongoengine import QuerySet, ValidationError, MongoEngine, MongoEngineSessionInterface
+from mongoengine import signals
 from flask_debugtoolbar import DebugToolbarExtension
 from decorator import login_required
 
@@ -23,6 +25,7 @@ app.config.from_object('settings')
 db=MongoEngine(app)
 app.session_interface = MongoEngineSessionInterface(db)
 toolbar = DebugToolbarExtension(app)
+csrf = CsrfProtect(app)
 
 class LeroLeroException(Exception):
 	pass
@@ -30,6 +33,9 @@ class LeroLeroException(Exception):
 class LeroLero(db.Document):
 	id = db.StringField(primary_key=True)
 	text = db.StringField(required=True)
+	pid = db.StringField(default='')
+	share_count = db.IntField(default=0)
+	status = db.BooleanField(default=True)
 	
 	@classmethod
 	def get(cls):
@@ -93,10 +99,27 @@ class LeroLero(db.Document):
 		try:
 			g = facebook.GraphAPI(pensador.access_token)
 			g.put_wall_post(profile_id=pensador.id, message="", attachment=attachment)
+			self._share_count()
 			return True
 		except Exception as e:
 			raise LeroLeroException(e)
-			
+	
+	def _share_count(self):
+		"""
+			Método responsável incrementar a quantidade de vezes que o pensamento foi compartilhado.
+		"""
+		self.share_count += 1
+		self.save()
+	
+#	@classmethod
+#	def pre_save(cls, sender, document, **kwargs):
+#		"""
+#			Método utilizado para criar o id dinamicamente.
+#		"""
+#		if document.text:
+#			document.id = hashlib.md5(__text.encode('utf8')).hexdigest()
+#signals.pre_save.connect(LeroLero.pre_save, sender=LeroLero)
+
 import datetime
 now = datetime.datetime.now
 	
@@ -110,7 +133,13 @@ class Pensador(db.Document):
 	date_created=db.DateTimeField(default=now())
 	profile_url = db.URLField(required=True)
 	access_token = db.StringField(required=True)
-
+	
+	def tokenEqual(self, tokenFacebook):
+		"""
+			Método verifica se o token passado é igual que já existe na base.
+		"""
+		return self.access_token.upper() == str(tokenFacebook).upper()
+		
 class Agendamento(db.Document):
 	"""
 		Content responsável por todos os agendamentos de pensamentos::
@@ -145,27 +174,28 @@ class Agendamento(db.Document):
 			times[index] = value.encode('utf8').split(',')
 		return times
 		
-@app.route('/')
-@app.route('/<leroid>')
-def home(leroid=None):
+@app.route('/', defaults={'leroid':None})
+@app.route('/<string:leroid>')
+def home(leroid):
 	if leroid:
 		app.logger.info("Select specific an object.")
 		oo = LeroLero.objects(id=leroid)
+		
+		if not oo.count():
+			app.logger.error("Erro 404. {0} - {1}".format(oo.count(), leroid))
+			abort(404)
 	else:
 		app.logger.info("Get random information.")
 		oo = LeroLero.random()
 	lero = oo.only("id", "text").first()
 	
-	if lero is None:
-		app.logger.error("Erro 404.")
-		abort(404)
 	try:
 		pensador = Pensador.objects(id=session['user']['id']).first()
 		agendamento = Agendamento.objects(pensador=pensador).first()
 		times = Agendamento.create_times(agendamento.times_tag)
 	except:
 		times = []
-	app.logger.info("Load informations")
+	app.logger.info("Load informations home")
 	return render_template('template.html', **locals())
 	
 @app.route('/login/authorized')
@@ -179,7 +209,7 @@ def facebook_authorized():
 			me = graph.get_object('me')
 			p = Pensador(id=str(me["id"]), name=me['name'], email=me['email'], profile_url=me['link'], access_token=cookie['access_token'])
 			p.save()
-		elif p.access_token is not cookie["access_token"]:
+		elif not p.tokenEqual(cookie["access_token"]):
 			app.logger.info("Token don't same. oldToken:{0}".format(p.access_token))
 			p = Pensador(id=p.id, name=p.name, email=p.email, profile_url=p.profile_url, access_token=cookie["access_token"])
 			p.save()
@@ -239,8 +269,14 @@ def schedule():
 @app.route("/new-thought", methods=['POST'])
 @login_required
 def new_thought():
-	abort(404)
-
+	app.logger.info("start new_thought")
+	try:
+		LeroLero(text=request.form['text'], pid=session['user']['id']).save()
+	except ValidationError as e:
+		app.logger.error(e)
+		return jsonify(message='Houve um error ao tentar enviar lerolero.', status=500)
+	return jsonify(message='LeroLero enviado com sucesso', status=200)
+		
 @app.route('/thinking-now/<leroid>', methods=['GET'])
 @login_required
 def thinking_now(leroid):
@@ -252,7 +288,18 @@ def thinking_now(leroid):
 	except Exception as e:
 		app.logger.error("{0} - {1}".format(e, request.host))
 		return jsonify(message='Houve ao tentar realizar postagem.', status=500)
-		
+
+@app.route('/share-count', methods=['POST'])
+@csrf.exempt
+def share_count():
+	try:
+		LeroLero.objects(id=request.form['id']).first()._share_count()
+		app.logger.info('LeroLero interado.')
+		return jsonify(message='LeroLero interado.', status=200)
+	except Exception as e:
+		app.logger.error('houve erro ao interar LeroLero. {0}'.format(e))
+		return jsonify(message='houve erro ao interar LeroLero.', status=500)
+			
 @app.errorhandler(404)
 def page_not_found(e):
 	return 'Página não encontra.'

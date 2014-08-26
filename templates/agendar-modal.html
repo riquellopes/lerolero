@@ -1,0 +1,51 @@
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Agendar horário do pensamento do dia:</h4>
+      </div>
+      <div class="modal-body">
+		<form class="form-horizontal" role="form" onsubmit="return false;">
+			{#$('#input-weeks').tagsinput('add', { "value": 1 , "text": "Amsterdam"  });#}
+			{% from 'macro.html' import render_week %}
+			{% for w in config['TIMES'] %}
+			   <div class="form-group">
+					<label for='status' class="col-sm-2 control-label">{{w.text}}:</label>
+					<div class='col-sm-10 input-100'>
+						<input type='text' id='input-times-{{w.value}}' name='times-{{w.value}}'>
+						<script>
+							$(function(){
+								$('#input-times-{{w.value}}').tagsinput({
+									itemValue: 'value',
+									itemText: 'text'
+								});
+								
+								{% set time = 'times-%s' % w.value %}
+								{{ render_week(input=w.value, weeks=times[time])}}
+								
+								$('#input-times-{{w.value}}').tagsinput('input').typeahead({
+									valueKey:'text',
+									prefetch:'weeks.json',
+									{% raw %}
+										template:"<p>{{text}}</p>",
+									{% endraw %}
+									engine:Hogan
+								}).bind('typeahead:selected', $.proxy(function (obj, datum) {
+										this.tagsinput('add', datum);
+										this.tagsinput('input').typeahead('setQuery', '');
+								}, $('#input-times-{{w.value}}')));
+							});
+						</script>
+					</div>
+				</div>
+			{% endfor%}
+		</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save-changes">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
