@@ -2,3 +2,4 @@
 .DS_Store
 .env
 local_config.py
+*.swp
