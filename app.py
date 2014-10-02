@@ -49,7 +49,7 @@ class LeroLero(db.Document):
 		
 	@classmethod
 	def random(cls):
-		if choice([True, False]):
+		if choice([False]):#True, 
 			"""
 				1- Caso o seja 1 o valor deve ser recuperado do banco
 			"""
